@@ -34,4 +34,31 @@ while donut != "exit" or donut != "quit":
                 print("Zlib v1.2.12 .... Installed")
                 print()
             else:
-                print("Package not in Repository")
+                print()
+                print("Zlib Not Installed")
+                print()
+        elif "grub" in donut:
+            print()
+            print("Connecting to the Server...")
+            print("Loading Repository Data....")
+            print()
+            print("The following package(s) are going to be installed: ")
+            print("\t GRUB-1.99")
+            confirm = input("Are you sure you want to install it? (y/n) : ")
+            if confirm == "y" or confirm == "yes":
+                print("Downloading GRUB-1.99")
+                os.system('wget https://ftp.gnu.org/gnu/grub/grub-1.99.tar.xz')
+                print("Downloaded GRUB-1.99")
+                print()
+                print("Please wait... Preparing to Configure and Install GRUB...")
+                print("Downloading Configuration Script and Installing GRUB...")
+                os.system('wget https://github.com/gauthamnair2005/DonutLinux/blob/main/grub_ci.sh')
+                os.system('bash grub_ci.sh')
+                print("GRUB v1.99 .... Installed")
+                print()
+            else:
+                print()
+                print("GRUB Not Installed")
+                print()
+        else:
+            print("Will be added to the repository soon..")
