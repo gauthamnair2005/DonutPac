@@ -29,8 +29,10 @@ while donut != "exit" or donut != "quit":
                 print()
                 print("Please wait... Preparing to Configure and Install Zlib..")
                 print("Downloading Configuration Script and Installing Zlib...")
-                os.system('wget https://github.com/gauthamnair2005/DonutLinux/blob/main/zlib_ci.sh')
+                os.system('wget https://raw.githubusercontent.com/gauthamnair2005/DonutLinux/main/zlib_ci.sh')
                 os.system('bash zlib_ci.sh')
+                os.system('sudo rm -Rf zlib-1.2.12')
+                os.system('sudo rm zlib_ci.sh')
                 print("Zlib v1.2.12 .... Installed")
                 print()
             else:
@@ -52,8 +54,10 @@ while donut != "exit" or donut != "quit":
                 print()
                 print("Please wait... Preparing to Configure and Install GRUB...")
                 print("Downloading Configuration Script and Installing GRUB...")
-                os.system('wget https://github.com/gauthamnair2005/DonutLinux/blob/main/grub_ci.sh')
+                os.system('wget https://raw.githubusercontent.com/gauthamnair2005/DonutLinux/main/grub_ci.sh')
                 os.system('bash grub_ci.sh')
+                os.system('sudo rm -Rf grub-1.99')
+                os.system('sudo rm grub_ci.sh')
                 print("GRUB v1.99 .... Installed")
                 print()
             else:
