@@ -76,6 +76,10 @@ else:
                 print()
                 print("DonutPac for DonutOS/DonutLinux")
                 print()
+            elif donut == "codename":
+                print()
+                print("CodenameBeggorraPM")
+                print("CodenameBeggorraPackageManager")
             else:
                 print()
                 print("Connecting to the Server...")
