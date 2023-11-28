@@ -1,113 +1,83 @@
 import os
-import sys
+import argparse
+from tqdm import tqdm
+import time
+import requests
+import json
+import subprocess
+
+def download_packages():
+    url = "https://raw.githubusercontent.com/gauthamnair2005/DonutPac/main/packages.json"
+    response = requests.get(url)
+    return response.json()
+
+def is_connected():
+    try:
+        print(f"Connecting to the Server...")
+        requests.get('http://sites.google.com/view/donutlinux', timeout=5)
+        return True
+    except requests.exceptions.RequestException:
+        return False
 
 
-
-os.system('clear')
-print()
-print("DonutPac - Package Manager for DonutOS")
-print("-------------------------------------------")
-print()
-print("To install a package just type the package name in the prompt..")
-print()
-donut = ""
-while donut != "exit" or donut != "quit":
-    donut = input("DonutPac > ").lower()
-    if donut == "exit" or donut == "quit":
-        break
-    else:
-        if "zlib" in donut:
-            print()
-            print("Connecting to the Server...")
+def install_package(package, packages):
+    if package in packages:
+        if is_connected():
             print("Loading Repository Data....")
-            print()
-            print("The following package(s) are going to be installed: ")
-            print("\t Zlib-1.2.13")
+            print(f"The following package(s) are going to be installed: ")
+            print(f"\t {package}-{packages[package]['version']}")
             confirm = input("Are you sure you want to install it? (y/n) : ")
-            if confirm == "y" or confirm == "yes":
-                print("Downloading Zlib-1.2.13")
-                os.system('wget http://zlib.net/zlib-1.2.13.tar.gz')
-                print("Downloaded Zlib-1.2.13")
-                print()
-                print("Please wait... Preparing to Configure and Install Zlib..")
-                print("Downloading Configuration Script and Installing Zlib...")
-                os.system('wget https://raw.githubusercontent.com/gauthamnair2005/DonutLinux/main/zlib_ci.sh')
-                os.system('bash zlib_ci.sh')
-                os.system('sudo rm -Rf zlib-1.2.13')
-                os.system('sudo rm zlib_ci.sh')
-                print("Executed")
-                print()
-            else:
-                print()
-                print("Zlib Not Installed")
-                print()
-        elif "GCC" in donut:
-            print()
-            print("Connecting to the Server...")
-            print("Loading Repository Data....")
-            print()
-            print("The following package(s) are going to be installed: ")
-            print("\t GCC-13.1.0")
-            print("\t MPFR")
-            print("\t MPC")
-            print("\t GMP")
-            confirm = input("Are you sure you want to install these packages? (y/n) : ")
-            if confirm == "y" or confirm == "yes":
-                print("Downloading GCC-13.1.0, GMP, MPC, MPFR")
-                os.system('wget https://ftp.gnu.org/gnu/gcc/gcc-13.1.0/gcc-13.1.0.tar.xz')
-                os.system('wget https://ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.xz')
-                os.system('wget https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz')
-                os.system('wget https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.0.tar.xz')
-                print("Downloaded GCC-13.1.0, GMP, MPC, MPFR")
-                print()
-                print("Please wait... Preparing to Configure and Install GCC...")
-                print("Downloading Configuration Script and Installing GCC...")
-                os.system('wget https://raw.githubusercontent.com/gauthamnair2005/DonutLinux/main/gcc_ci.sh')
-                os.system('bash gcc_ci.sh')
-                os.system('sudo rm -Rf gcc-13.1.0')
-                os.system('sudo rm gcc_ci.sh')
-                os.system('sudo rm gcc-13.1.0.tar.xz')
-                print("Executed")
-                print()
-        elif "grub" in donut:
-            print()
-            print("Connecting to the Server...")
-            print("Loading Repository Data....")
-            print()
-            print("The following package(s) are going to be installed: ")
-            print("\t GRUB-2.06")
-            confirm = input("Are you sure you want to install it? (y/n) : ")
-            if confirm == "y" or confirm == "yes":
-                print("Downloading GRUB-2.06")
-                os.system('wget https://ftp.gnu.org/gnu/grub/grub-2.06.tar.xz')
-                print("Downloaded GRUB-2.06")
-                print()
-                print("Please wait... Preparing to Configure and Install GRUB...")
-                print("Downloading Configuration Script and Installing GRUB...")
-                os.system('wget https://raw.githubusercontent.com/gauthamnair2005/DonutLinux/main/grub_ci.sh')
-                os.system('bash grub_ci.sh')
-                os.system('sudo rm -Rf grub-2.06')
-                os.system('sudo rm grub_ci.sh')
-                os.system('sudo rm grub-2.06.tar.xz')
-                print("Executed")
-                print()
-            else:
-                print()
-                print("GRUB Not Installed")
-                print()
-        elif donut == "developer":
-            print()
-            print("Gautham Nair")
-            print()
-            print("DonutPac for DonutOS/DonutLinux")
-            print()
-        elif donut == "codename":
-            print()
-            print("Munnar")
+            if confirm.lower() in ["y", "yes"]:
+                print(f"Downloading {package}-{packages[package]['version']}")
+                try:
+                    response = requests.get(packages[package]['link'], stream=True)
+                    total_size = int(response.headers.get('content-length', 0))
+                    block_size = 1024  # 1 Kibibyte
+                    progress_bar = tqdm(total=total_size, unit='iB', unit_scale=True)
+                    with open(f'{package}.tar.gz', 'wb') as file:
+                        for data in response.iter_content(block_size):
+                            progress_bar.update(len(data))
+                            file.write(data)
+                    progress_bar.close()
+                    if total_size != 0 and progress_bar.n != total_size:
+                        print("ERROR, something went wrong")
+                    print(f"Downloaded {package}-{packages[package]['version']}")
+
+                    print(f"Extracting {package}.tar.gz")
+                    subprocess.run(['tar', '-xf', f'{package}.tar.gz'])
+
+                    print(f"Configuring {package}")
+                    subprocess.run(['./configure'], cwd=package, check=True)
+
+                    print(f"Making {package}")
+                    subprocess.run(['make', '-j4'], cwd=package, check=True)
+
+                    print(f"Installing {package}")
+                    subprocess.run(['make', 'install'], cwd=package, check=True)
+
+                    print(f"Cleaning up")
+                    subprocess.run(['rm', '-rf', package])
+                    subprocess.run(['rm', f'{package}.tar.gz'])
+
+                except Exception as e:
+                    print(f"An error occurred while installing {package}: {e}")
         else:
-            print()
-            print("Connecting to the Server...")
-            print("Loading Repository Data....")
-            print()
-            print("The package ", donut , " couldn't be located in DonutPac's Index")
-            print()
+            print("No internet connection. Please check your network settings.")
+    else:
+        print(f"Package {package} not found.")
+
+def main():
+    parser = argparse.ArgumentParser(description='DonutPac - Package Manager for DonutOS')
+    parser.add_argument('command', help='Command to execute (install)')
+    parser.add_argument('package', help='Package to install')
+
+    args = parser.parse_args()
+
+    if args.command.lower() == "install":
+        packages = download_packages()
+        install_package(args.package.lower(), packages)
+    else:
+        print(f"Invalid command: {args.command}")
+
+if __name__ == "__main__":
+    main()
