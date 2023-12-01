@@ -49,7 +49,7 @@ def install_package(package, packages):
                     subprocess.run(['mv',f"{package}-{packages[package]['version']}",f"{package}"])
 
                     print(f"Configuring {package}")
-                    subprocess.run(['./configure'], cwd=package, check=True)
+                    subprocess.run(['cd ',f'{package}','./configure'], cwd=package, check=True)
 
                     print(f"Making {package}")
                     subprocess.run(['make', '-j4'], cwd=package, check=True)
