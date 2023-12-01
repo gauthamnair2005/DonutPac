@@ -46,7 +46,7 @@ def install_package(package, packages):
                     print(f"Extracting {package}.tar.gz")
                     subprocess.run(['tar', '-xf', f'{package}.tar.gz'])
 
-                    subprocess.run(['mv',f"{package}-{packages[package]['version']}",f"{package}")
+                    subprocess.run(['mv',f"{package}-{packages[package]['version']}",f"{package}"])
 
                     print(f"Configuring {package}")
                     subprocess.run(['./configure'], cwd=package, check=True)
