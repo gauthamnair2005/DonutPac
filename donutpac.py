@@ -46,10 +46,10 @@ def install_package(package, packages):
                     print(f"Extracting {package}.tar.gz")
                     subprocess.run(['tar', '-xf', f'{package}.tar.gz'])
 
-                    subprocess.run(['mv',f"{package}-{packages[package]['version']}",f"{package}"])
+                    subprocess.run(['sudo','mv',f"{package}-{packages[package]['version']}",f"{package}"])
 
                     print(f"Configuring {package}")
-                    subprocess.run(['cd ',f'{package}','&&','./configure'], cwd=package, check=True)
+                    os.system(f"cd {package} && ./configure")
 
                     print(f"Making {package}")
                     subprocess.run(['make', '-j4'], cwd=package, check=True)
